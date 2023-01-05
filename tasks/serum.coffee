@@ -59,6 +59,62 @@ commonTasks $
 # preparing tasks
 # --------------------------------
 
+# Here you can add search strings for automatic category mapping. This is useful if the preset creator didn't add the category tag to it and only encoded the type of the sound within the naming.
+# eg: "BS - Ultimate Bass.fxp" -> Bass
+#     "PLCK - Some Noise.fxp"  -> Pluck
+
+# keep in mind that the first match will be taken.
+
+categoryMap = {
+  "Synth": ["SY","Syn","Synth"],
+  "Bass": ["BS","Bass"]
+  "Lead": ["LD","lead", "Saw", "Template"],
+  "Sequence": ["SQ","Seq"],
+  "Stab": ["STB","Stab"],
+  "SFX": ["SFX","FX", "Effect"],
+  "Keyboard": ["KEY","Key"],
+  "Pluck": ["PL","PLCK", "PLK", "Pluck"],
+  "Pad": ["Pad","PD"],
+  "Drum": ["808", "909", "Kick", "Drum"],
+  "String": ["String"],
+  "Organ": ["ORGAN"]
+  "Arpeggio": ["ARP","Arpeggio", "AR"],
+  "Chord": ["CH","CHRD", "CHD", "Chord"],
+}
+
+# search at the beginning of a string
+startMatch = (str, map) ->
+  # Convert the input string to lowercase
+  str = str.toLowerCase()
+
+  # Create a new map object with lowercase values
+  lowerCaseMap = {}
+  for key, value of map
+    lowerCaseMap[key] = value.map((val) -> val.toLowerCase())
+
+  for key, value of lowerCaseMap
+    for val in value
+      if str.startsWith(val)
+        return key
+  return null
+
+# search within the name
+containMatch = (str, map) ->
+  # Convert the input string to lowercase
+  str = str.toLowerCase()
+
+  # Create a new map object with lowercase values
+  lowerCaseMap = {}
+  for key, value of map
+    lowerCaseMap[key] = value.map((val) -> val.toLowerCase())
+
+  for key, value of lowerCaseMap
+    for val in value
+      if str.includes(val)
+        return key
+  return null
+
+
 # generate metadata
 gulp.task "#{$.prefix}-generate-meta", ->
   # open database
@@ -71,15 +127,32 @@ gulp.task "#{$.prefix}-generate-meta", ->
         $name: path.basename file.path, '.fxp'
         $folder: path.dirname file.relative
       # execute query
+
+      console.log "params: " + JSON.stringify(params)
       db.get $.query, params, (err, row) ->
+
+        console.log "row: " + JSON.stringify(row)
+        # console.log "row.Category: " + row?.Category
+
+        searchName = row?.PresetDisplayName?.trim() ||  path.basename(file.path, '.fxp')
+        console.log "searchName: " + searchName
+        result = startMatch(searchName, categoryMap) || containMatch(searchName, categoryMap)
+        console.log "Looking for: " + row?.PresetDisplayName?.trim()
+        console.log "row.Category? " + row?.Category?.trim()
+        console.log "RESULT : " + result
+        # return if row == undefined
+
+        chain = if file.path.startsWith "/Library/Audio/Presets/Xfer Records/Serum Presets/Presets/User/" then "User" else 'Serum Factory'
+        console.log "chain: " + file.path
+
         done err,
           vendor: $.vendor
-          types: [[row.Category?.trim()]]
-          name: row.PresetDisplayName?.trim()
+          types: [[row?.Category?.trim() || result]]
+          name: searchName
           deviceType: 'INST'
-          comment: row.Description?.trim()
-          bankchain: ['Serum', 'Serum Factory', '']
-          author: row.Author?.trim()
+          comment: row?.Description?.trim()
+          bankchain: ['Serum', chain, '']
+          author: row?.Author?.trim()
     .pipe tap (file) ->
       file.data.uuid = util.uuid file
       file.contents = Buffer.from util.beautify file.data, on
@@ -101,6 +174,7 @@ gulp.task "#{$.prefix}-dist-presets", ->
     .pipe data (file) ->
       # fxp header 60 byte - PCHK header 4 byte
       file.contents = file.contents.slice 56
+      console.log "file.contents" + file.contents
       # write PCHK header
       file.contents.writeUInt32LE 1, 0
       nksf:
