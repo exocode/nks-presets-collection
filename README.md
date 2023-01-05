@@ -1,4 +1,5 @@
 # nks-presets-collection
+
 NKS(Native Kontrol Standard) presets collection
 
 Fully assembled NKSF files can be downloaded from [here](https://www.dropbox.com/sh/h4tvgrq8avmhdoj/AAB_ABlKwXsCYFwBW_k5Fc7-a?dl=0).
@@ -58,25 +59,29 @@ Fully assembled NKSF files can be downloaded from [here](https://www.dropbox.com
  6. Exporting feature is currently experimental.
  7. Discontinued for some reasons.
  8. build directly from vendor's patch files.
- 
+
 ## Build Instructions
 
 ### Software Requirements
-  - [git](https://help.github.com/articles/set-up-git/)
-  - [node.js](https://nodejs.org)
+
+- [git](https://help.github.com/articles/set-up-git/)
+- [node.js](https://nodejs.org)
 
   I recommend to use [nvm](https://github.com/creationix/nvm).
 
-    # I have no plan to migrate this project to gulp4, so need to stay v10.
-    nvm install v10
-    nvm use v10
+## I have no plan to migrate this project to gulp4, so need to stay v10
 
-  - [gulp](http://gulpjs.com/)
-    ```shellscript
-    npm install gulp-cli -g
-    ```
+  nvm install v10
+  nvm use v10
+
+- [gulp](http://gulpjs.com/)
+
+```shellscript
+npm install gulp-cli -g
+```
 
 ### Cloning this repository
+
 ```shellscript
 git clone https://github.com/jhorology/nks-presets-collection.git
 
@@ -86,45 +91,56 @@ npm install
 ```
 
 ### Configuration
+
 Modify configuration file `config.coffee` and configuration section of each plugin's task file 'tasks/*.coffee' to suit your environment.
 
 ### Workflows
 
 In case of Serum.
- - I want to use own mappings.
-  1. Edit parameter mappings in Komplete Kontrol, and save preset as `_Default.nksf`.
 
-  1. Execute following command to generate `src/Serum/mappings/default.json`
-     ```shellscript
-     gulp serum-generate-default-mapping
-     ```
-  1. Edit `src/Serum/mappings/default.json` whatever you want. (Optional)
-    - Sorry, I can't say nothing about json format, because officially not opened. Following command may help you.
+- I want to use own mappings.
+
+1. Edit parameter mappings in Komplete Kontrol, and save preset as `_Default.nksf`.
+2. Execute following command to generate `src/Serum/mappings/default.json`
+
     ```shellscript
-    gulp serum-print-default-mapping
+    gulp serum-generate-default-mapping
     ```
 
-  1. Execute following command to build and deploy presets to your environment.
-     ```shellscript
-     gulp serum-deploy-presets
-     ```
+3. Edit `src/Serum/mappings/default.json` whatever you want. (Optional)
+
+- Sorry, I can't say nothing about json format, because officially not opened. Following command may help you.
+
+```shellscript
+gulp serum-print-default-mapping
+```
+
+1. Execute following command to build and deploy presets to your environment.
+
+   ```shellscript
+   gulp serum-deploy-presets
+   ```
 
 - I want to categorize presets by own policy.
 
   1. Edit each `.meta` files in `src/Serum/presets` folder. It's a nightmare.
 
   1. Another option is modifying `serum-generate-meta` task of `tasks/serum.coffee`.
-    - Sorry again, I can't say nothing about meta format, because officially not opened. Following command may help you.
+  - Sorry again, I can't say nothing about meta format, because officially not opened. Following command may help you.
+
     ```shellscript
     gulp serum-print-default-meta
     ```
+
     For some more information, refer to [gulp-nks-rewrite-meta](https://www.npmjs.com/package/gulp-nks-rewrite-meta).
   1. Execute following command to generate meta files in `src/Serum/presets` folder.
+
      ```shellscript
      gulp serum-generate-meta
      ```
 
   1. Execute following command to build and deploy presets to your environment.
+
      ```shellscript
      gulp serum-deploy-presets
      ```
@@ -151,13 +167,16 @@ In case of Serum.
   - Please see the example task `serum-generate-meta` and `analoglab-generate-meta`.
 
 ### What is NKSF File (Unofficial)
+
 NKSF file is the only type of [RIFF](https://msdn.microsoft.com/en-us/library/windows/desktop/dd798636(v=vs.85).aspx) (Resource Interchange File Format). File has 4 chunks inside.
-```
+
+```md
   - NISI  (Native Instruments Summary Information)
   - NICA  (Native Instruments Controller Assignments)
   - PLID  (Plugin ID)
   - PCHK  (Plugin Chunk)
- ```
+```
+
 *naming is my guess.
 
 It seems that first 3 chunks are encoded using [MessagePack](http://msgpack.org). PCHK chunk is the only pluginstates.
