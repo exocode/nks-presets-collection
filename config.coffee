@@ -14,13 +14,13 @@ module.exports =
     stderr: true           # default = true, false means don't write stderr
     stdout: true           # default = true, false means don't write stdout
 
-  fxpPresets: '/Volumes/Media/Music/Presets/fxp'
+  fxpPresets: '~/Documents/Music/Presets/fxp'
 
   # Native Instruments
   #-------------------------------------------
   NI:
     # content: '/Users/Shared'
-    content: '/Volumes/Media/Music/Native Instruments'
+    content: '~/Music/Native Instruments'
     userContent: "#{process.env.HOME}/Documents/Native Instruments/Custom NKS"
     resources: '/Users/Shared/NI Resources'
 
